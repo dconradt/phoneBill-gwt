@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="phonebill-gwt:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="phonebill-gwt.war">
+      <element id="artifact" artifact-name="phonebill-gwt:war exploded" />
+    </root>
+  </artifact>
+</component>
