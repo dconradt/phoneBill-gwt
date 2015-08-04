@@ -82,7 +82,7 @@ public class PhoneBillGwt implements EntryPoint {
         txtCustomerName.setMaxLength(20);
         lblCustomerName = new Label("Customer Name");
         btnDisplay = new Button("Display Calls");
-        btnDisplay.addClickHandler(displayAllCalls());
+        btnDisplay.addClickHandler(displayAllCalls(rootPanel));
         rootPanel.add(lblCustomerName, lblFromLeft, lblFromTop);
         rootPanel.add(txtCustomerName, txtFromLeft, txtFromTop);
         rootPanel.add(btnDisplay, lblFromLeft, lblFromTop + 40);
@@ -123,7 +123,7 @@ public class PhoneBillGwt implements EntryPoint {
     }
 
 
-    private ClickHandler displayAllCalls() {
+    private ClickHandler displayAllCalls(final RootPanel rootPanel) {
         return new ClickHandler() {
             public void onClick( ClickEvent clickEvent )
             {
@@ -133,8 +133,9 @@ public class PhoneBillGwt implements EntryPoint {
                 String calleeNumber = "";
                 String startTime = "";
                 String endTime = "";
+
                 PingServiceAsync async = GWT.create(PingService.class);
-                async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
+                async.ping(customerName,callerNumber, calleeNumber,startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
                     public void onFailure( Throwable ex )
                     {
                         Window.alert(ex.toString());
@@ -144,8 +145,9 @@ public class PhoneBillGwt implements EntryPoint {
                     {
                         Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
                         String customerName = phonebill.getCustomer();
-                        lblHeader = new Label("Customer Phone Bill\nCustomer Name: " + customerName + "\n\n\tCaller " +
+                        lblHeader = new Label("Customer Phone Bill Customer Name: " + customerName + "\n\n\tCaller " +
                                 "Number\tCallee Number\tStarting Call Time\t\tEnding Call Time\t\tDuration of call\n");
+                        rootPanel.add(lblHeader);
                         for ( AbstractPhoneCall call : calls ) {
                            // SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
                            // Date endCall = null;
@@ -165,15 +167,14 @@ public class PhoneBillGwt implements EntryPoint {
                             String phoneBillRecord = "\t" + call.getCaller() + "\t" + call.getCallee() + "\t"
                                     + call.getStartTimeString() + "\t\t" + call.getEndTimeString() + "\t\t";
 
-                            lblPhoneCall = new Label(phoneBillRecord);
+                            lblPhoneCall = new Label(phoneBillRecord );
+                            rootPanel.add(lblPhoneCall);
                         }
-                        //txtCustomerName.setText(null);
-                        //txtCustomerName.setVisible(false);
-                       // lblCustomerName.setVisible(false);
-                       // btnDisplay.setVisible(false);
-                        //lblHeader.setVisible(false);
-
-
+                        txtCustomerName.setText(null);
+                        txtCustomerName.setVisible(false);
+                        lblCustomerName.setVisible(false);
+                        btnDisplay.setVisible(false);
+                        lblHeader.setVisible(false);
                     }
                 });
             }
@@ -184,11 +185,11 @@ public class PhoneBillGwt implements EntryPoint {
           public void onClick( ClickEvent clickEvent )
           {
 
-              String customerName = txtCustomerName.getText();
-                      String callerNumber = txtCallerNumber.getText();
-                      String calleeNumber = txtCalleeNumber.getText();
-                      String startTime = txtStartTime.getText();
-                      String endTime = txtEndTime.getText();
+              final String customerName = txtCustomerName.getText();
+              final String callerNumber = txtCallerNumber.getText();
+              final String calleeNumber = txtCalleeNumber.getText();
+              final String startTime = txtStartTime.getText();
+              final String endTime = txtEndTime.getText();
                       PingServiceAsync async = GWT.create(PingService.class);
                       async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
                           public void onFailure(Throwable ex) {
@@ -198,6 +199,10 @@ public class PhoneBillGwt implements EntryPoint {
                           public void onSuccess(AbstractPhoneBill phonebill) {
                               Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
                               for (AbstractPhoneCall call : calls) {
+                             // Window.alert(customerName + "'s phone call from " +
+                              //        callerNumber + " to " + calleeNumber + " between " +
+                              //        startTime + " and " + endTime + " was added" +
+                               //       " to the phone bill.");
                                   Window.alert(phonebill.getCustomer() + "'s phone call from " +
                                           call.getCaller() + " to " + call.getCallee() + " between " +
                                           call.getStartTimeString() + " and " + call.getEndTimeString() + " was added" +
