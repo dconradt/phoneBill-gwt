@@ -13,6 +13,7 @@ import edu.pdx.cs410J.AbstractPhoneBill;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 /**
@@ -76,6 +77,30 @@ public class PhoneBillGwt implements EntryPoint {
 
 
   }
+
+    private void clearWindow() {
+        txtCustomerName.setText(null);
+        txtCustomerName.setVisible(false);
+        lblCustomerName.setVisible(false);
+        btnDisplay.setVisible(false);
+        lblHeader.setVisible(false);
+        txtCustomerName.setText(null);
+        txtCustomerName.setVisible(false);
+        txtCallerNumber.setText(null);
+        txtCallerNumber.setVisible(false);
+        txtCalleeNumber.setText(null);
+        txtCalleeNumber.setVisible(false);
+        txtStartTime.setText(null);
+        txtStartTime.setVisible(false);
+        txtEndTime.setText(null);
+        txtEndTime.setVisible(false);
+        btnAddCall.setVisible(false);
+        lblCustomerName.setVisible(false);
+        lblCallerNumber.setVisible(false);
+        lblCalleeNumber.setVisible(false);
+        lblStartTime.setVisible(false);
+        lblEndTime.setVisible(false);
+    }
 
     private void listCalls(RootPanel rootPanel) {
         txtCustomerName = new TextBox();
@@ -144,6 +169,7 @@ public class PhoneBillGwt implements EntryPoint {
                     public void onSuccess( AbstractPhoneBill phonebill )
                     {
                         Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
+
                         String customerName = phonebill.getCustomer();
                         lblHeader = new Label("Customer Phone Bill Customer Name: " + customerName + "\n\n\tCaller " +
                                 "Number\tCallee Number\tStarting Call Time\t\tEnding Call Time\t\tDuration of call\n");
@@ -174,7 +200,7 @@ public class PhoneBillGwt implements EntryPoint {
                         txtCustomerName.setVisible(false);
                         lblCustomerName.setVisible(false);
                         btnDisplay.setVisible(false);
-                        lblHeader.setVisible(false);
+                       // lblHeader.setVisible(false);
                     }
                 });
             }
@@ -182,53 +208,49 @@ public class PhoneBillGwt implements EntryPoint {
     }
     private ClickHandler createNewPhoneBillOnServer() {
         return new ClickHandler() {
-          public void onClick( ClickEvent clickEvent )
-          {
+            public void onClick(ClickEvent clickEvent) {
 
-              final String customerName = txtCustomerName.getText();
-              final String callerNumber = txtCallerNumber.getText();
-              final String calleeNumber = txtCalleeNumber.getText();
-              final String startTime = txtStartTime.getText();
-              final String endTime = txtEndTime.getText();
-                      PingServiceAsync async = GWT.create(PingService.class);
-                      async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
-                          public void onFailure(Throwable ex) {
-                              Window.alert(ex.toString());
-                          }
+                final String customerName = txtCustomerName.getText();
+                final String callerNumber = txtCallerNumber.getText();
+                final String calleeNumber = txtCalleeNumber.getText();
+                final String startTime = txtStartTime.getText();
+                final String endTime = txtEndTime.getText();
+                PingServiceAsync async = GWT.create(PingService.class);
+                async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
+                    public void onFailure(Throwable ex) {
+                        Window.alert(ex.toString());
+                    }
 
-                          public void onSuccess(AbstractPhoneBill phonebill) {
-                              Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
-                              for (AbstractPhoneCall call : calls) {
-                             // Window.alert(customerName + "'s phone call from " +
-                              //        callerNumber + " to " + calleeNumber + " between " +
-                              //        startTime + " and " + endTime + " was added" +
-                               //       " to the phone bill.");
-                                  Window.alert(phonebill.getCustomer() + "'s phone call from " +
-                                          call.getCaller() + " to " + call.getCallee() + " between " +
-                                          call.getStartTimeString() + " and " + call.getEndTimeString() + " was added" +
-                                          " to the phone bill.");
-                              }
-                              txtCustomerName.setText(null);
-                              txtCustomerName.setVisible(false);
-                              txtCallerNumber.setText(null);
-                              txtCallerNumber.setVisible(false);
-                              txtCalleeNumber.setText(null);
-                              txtCalleeNumber.setVisible(false);
-                              txtStartTime.setText(null);
-                              txtStartTime.setVisible(false);
-                              txtEndTime.setText(null);
-                              txtEndTime.setVisible(false);
-                              btnAddCall.setVisible(false);
-                              lblCustomerName.setVisible(false);
-                              lblCallerNumber.setVisible(false);
-                              lblCalleeNumber.setVisible(false);
-                              lblStartTime.setVisible(false);
-                              lblEndTime.setVisible(false);
+                    public void onSuccess(AbstractPhoneBill phonebill) {
+                        int length;
+                        Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
+                        length = calls.size();
+                        Window.alert(phonebill.getCustomer() + "'s phone call from " +
+                                callerNumber + " to " + calleeNumber + " between " +
+                                startTime + " and " + endTime + " was added" +
+                                " to the phone bill.");
 
-                          }
-                      });
-          }
-      };
+                        txtCustomerName.setText(null);
+                        txtCustomerName.setVisible(false);
+                        txtCallerNumber.setText(null);
+                        txtCallerNumber.setVisible(false);
+                        txtCalleeNumber.setText(null);
+                        txtCalleeNumber.setVisible(false);
+                        txtStartTime.setText(null);
+                        txtStartTime.setVisible(false);
+                        txtEndTime.setText(null);
+                        txtEndTime.setVisible(false);
+                        btnAddCall.setVisible(false);
+                        lblCustomerName.setVisible(false);
+                        lblCallerNumber.setVisible(false);
+                        lblCalleeNumber.setVisible(false);
+                        lblStartTime.setVisible(false);
+                        lblEndTime.setVisible(false);
+                    }
+                });
+            }
+
+        };
     }
 
     /**

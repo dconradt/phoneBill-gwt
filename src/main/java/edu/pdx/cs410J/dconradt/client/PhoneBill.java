@@ -6,10 +6,12 @@ import edu.pdx.cs410J.AbstractPhoneBill;
 import java.lang.Override;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 public class PhoneBill extends AbstractPhoneBill
 {
   private String customerName;
+
   private Collection<AbstractPhoneCall> calls = new ArrayList<AbstractPhoneCall>();
 
   public PhoneBill(String customerName) {
