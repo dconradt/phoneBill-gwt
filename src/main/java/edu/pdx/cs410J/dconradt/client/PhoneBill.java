@@ -34,6 +34,7 @@ public class PhoneBill extends AbstractPhoneBill
 
   @Override
   public Collection getPhoneCalls() {
+
     return this.calls;
   }
 }
