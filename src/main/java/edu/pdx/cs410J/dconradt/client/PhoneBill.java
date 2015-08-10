@@ -7,6 +7,8 @@ import java.lang.Override;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 
 public class PhoneBill extends AbstractPhoneBill
 {
@@ -34,7 +36,9 @@ public class PhoneBill extends AbstractPhoneBill
 
   @Override
   public Collection getPhoneCalls() {
-
-    return this.calls;
+    Collection newList = calls;
+    Collections.sort((List<Comparable>) newList);
+    return newList;
   }
+
 }

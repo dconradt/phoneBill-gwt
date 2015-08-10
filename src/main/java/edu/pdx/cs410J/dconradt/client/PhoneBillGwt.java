@@ -4,6 +4,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -11,7 +12,6 @@ import com.google.gwt.user.client.ui.*;
 import edu.pdx.cs410J.AbstractPhoneCall;
 import edu.pdx.cs410J.AbstractPhoneBill;
 
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -57,8 +57,6 @@ public class PhoneBillGwt implements EntryPoint {
         Command addCalls = new Command() {
             public void execute() {
                 addCall(rootPanel);
-                callGrid.setVisible(false);
-                lblCustomer.setVisible(false);
             }
         };
 
@@ -78,7 +76,7 @@ public class PhoneBillGwt implements EntryPoint {
         helpMenu = new MenuBar(true);
         actionMenu.addItem("Add Call", addCalls);
         actionMenu.addItem("Display All Calls", displayCalls);
-        actionMenu.addItem("Search Calls", readMe);
+        actionMenu.addItem("Search Calls", searchCalls);
         helpMenu.addItem("README", readMe);
         menu = new MenuBar();
         menu.addItem("Actions", actionMenu);
@@ -87,6 +85,7 @@ public class PhoneBillGwt implements EntryPoint {
   }
 
     private void searchCalls(RootPanel rootPanel) {
+        rootPanel.clear();
         txtCustomerName = new TextBox();
         txtCustomerName.setMaxLength(20);
         txtStartTime = new TextBox();
@@ -105,7 +104,8 @@ public class PhoneBillGwt implements EntryPoint {
         rootPanel.add(txtStartTime, txtFromLeft, txtFromTop + 20);
         rootPanel.add(lblEndTime, lblFromLeft, lblFromTop + 40);
         rootPanel.add(txtEndTime, txtFromLeft, txtFromTop + 40);
-        rootPanel.add(btnDisplay, lblFromLeft, lblFromTop + 800);
+        rootPanel.add(btnDisplay, lblFromLeft, lblFromTop + 80);
+        rootPanel.add(menu);
         btnDisplay.addClickHandler(displaySearchCalls(rootPanel));
     }
 
@@ -114,21 +114,20 @@ public class PhoneBillGwt implements EntryPoint {
             public void onClick( ClickEvent clickEvent )
             {
 
+                rootPanel.clear();
                 String customerName = txtCustomerName.getText();
                 String callerNumber = "";
                 String calleeNumber = "";
-                String startTime = txtStartTime.getText();
-                String endTime = txtEndTime.getText();
+                final String startTime = txtStartTime.getText();
+                final String endTime = txtEndTime.getText();
 
                 PingServiceAsync async = GWT.create(PingService.class);
-                async.ping(customerName,callerNumber, calleeNumber,startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
-                    public void onFailure( Throwable ex )
-                    {
+                async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
+                    public void onFailure(Throwable ex) {
                         Window.alert(ex.toString());
                     }
 
-                    public void onSuccess( AbstractPhoneBill phonebill )
-                    {
+                    public void onSuccess(AbstractPhoneBill phonebill) {
                         Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
                         String customerName = phonebill.getCustomer();
                         callGrid = new Grid();
@@ -141,28 +140,36 @@ public class PhoneBillGwt implements EntryPoint {
                         callGrid.getColumnFormatter().setWidth(2, "10%");
                         callGrid.getColumnFormatter().setWidth(3, "10%");
                         callGrid.getColumnFormatter().setWidth(4, "10%");
-                        callGrid.setText(0,0, "Caller Number");
-                        callGrid.setText(0,1, "Callee Number");
-                        callGrid.setText(0,2, "Start Time");
-                        callGrid.setText(0,3, "End Time");
-                        callGrid.setText(0,4, "Duration");
+                        callGrid.setText(0, 0, "Caller Number");
+                        callGrid.setText(0, 1, "Callee Number");
+                        callGrid.setText(0, 2, "Start Time");
+                        callGrid.setText(0, 3, "End Time");
+                        callGrid.setText(0, 4, "Duration");
                         int r = 1;
-                        for ( AbstractPhoneCall call : calls ) {
-                            callGrid.getColumnFormatter().setWidth(0, "10%");
-                            callGrid.setText(r,0, call.getCaller());
-                            callGrid.setText(r, 1, call.getCallee());
-                            callGrid.setText(r, 2, call.getStartTimeString());
-                            callGrid.setText(r, 3, call.getEndTimeString());
-                            callGrid.setText(r, 4, "not set yet");
-                            ++r;
+                        for (AbstractPhoneCall call : calls) {
+                            Date newStart = DateTimeFormat.getFormat("MM/dd/yyyy hh:mm a").parse(startTime);
+                            Date newEnd = DateTimeFormat.getFormat("MM/dd/yyyy hh:mm a").parse(endTime);
+                            if (((PhoneCall) call).getStartTime().compareTo(newStart) >= 0 && ((PhoneCall) call).getStartTime().compareTo(newEnd) <= 0) {
+                                Date endCall = null;
+                                endCall = call.getEndTime();
+                                Date startCall = null;
+                                startCall = call.getStartTime();
+                                long timeDifference = endCall.getTime() - startCall.getTime();
+                                int duration = (int) (timeDifference / (60 * 1000));
+                                callGrid.getColumnFormatter().setWidth(0, "10%");
+                                callGrid.setText(r, 0, call.getCaller());
+                                callGrid.setText(r, 1, call.getCallee());
+                                callGrid.setText(r, 2, call.getStartTimeString());
+                                callGrid.setText(r, 3, call.getEndTimeString());
+                                callGrid.setText(r, 4, duration + " minutes");
+                                ++r;
+                            }
                         }
                         rootPanel.add(lblCustomer, lblFromLeft + 80, lblFromTop + 10);
-                        rootPanel.add(callGrid,lblFromLeft + 80, lblFromTop + 40);
+                        rootPanel.add(callGrid, lblFromLeft + 80, lblFromTop + 40);
+                        rootPanel.add(menu);
 
-                        txtCustomerName.setText(null);
-                        txtCustomerName.setVisible(false);
-                        lblCustomerName.setVisible(false);
-                        btnDisplay.setVisible(false);
+
                     }
                 });
             }
@@ -171,7 +178,7 @@ public class PhoneBillGwt implements EntryPoint {
 
 
     private void listCalls(RootPanel rootPanel) {
-
+        rootPanel.clear();
         txtCustomerName = new TextBox();
         txtCustomerName.setMaxLength(20);
         lblCustomerName = new Label("Customer Name");
@@ -180,11 +187,12 @@ public class PhoneBillGwt implements EntryPoint {
         rootPanel.add(txtCustomerName, txtFromLeft, txtFromTop);
         rootPanel.add(btnDisplay, lblFromLeft, lblFromTop + 40);
         btnDisplay.addClickHandler(displayAllCalls(rootPanel));
+        rootPanel.add(menu);
 
     }
 
     private void addCall(RootPanel rootPanel) {
-
+        rootPanel.clear();
         txtCustomerName = new TextBox();
         txtCustomerName.setVisible(true);
         txtCustomerName.setMaxLength(20);
@@ -215,6 +223,7 @@ public class PhoneBillGwt implements EntryPoint {
         rootPanel.add(lblEndTime, lblFromLeft, lblFromTop + 80);
         rootPanel.add(txtEndTime, txtFromLeft, txtFromTop + 80);
         rootPanel.add(btnAddCall, lblFromLeft, lblFromTop + 120);
+        rootPanel.add(menu);
         btnAddCall.addClickHandler(createNewPhoneBillOnServer());
     }
 
@@ -223,7 +232,7 @@ public class PhoneBillGwt implements EntryPoint {
         return new ClickHandler() {
             public void onClick( ClickEvent clickEvent )
             {
-
+                rootPanel.clear();
                 String customerName = txtCustomerName.getText();
                 String callerNumber = "";
                 String calleeNumber = "";
@@ -258,21 +267,23 @@ public class PhoneBillGwt implements EntryPoint {
                         callGrid.setText(0,4, "Duration");
                         int r = 1;
                         for ( AbstractPhoneCall call : calls ) {
+                            Date endCall = null;
+                            endCall = call.getEndTime();
+                            Date startCall = null;
+                            startCall = call.getStartTime();
+                            long timeDifference = endCall.getTime() - startCall.getTime();
+                            int duration = (int)(timeDifference / (60 * 1000));
                             callGrid.getColumnFormatter().setWidth(0, "10%");
                             callGrid.setText(r,0, call.getCaller());
                             callGrid.setText(r, 1, call.getCallee());
                             callGrid.setText(r, 2, call.getStartTimeString());
                             callGrid.setText(r, 3, call.getEndTimeString());
-                            callGrid.setText(r, 4, "not set yet");
+                            callGrid.setText(r, 4, duration + " minutes");
                             ++r;
                             }
                             rootPanel.add(lblCustomer, lblFromLeft + 80, lblFromTop + 10);
                             rootPanel.add(callGrid, lblFromLeft + 80, lblFromTop + 40);
-
-                        txtCustomerName.setText(null);
-                        txtCustomerName.setVisible(false);
-                        lblCustomerName.setVisible(false);
-                        btnDisplay.setVisible(false);
+                            rootPanel.add(menu);
                     }
                 });
             }
@@ -281,8 +292,11 @@ public class PhoneBillGwt implements EntryPoint {
     private ClickHandler createNewPhoneBillOnServer() {
         return new ClickHandler() {
             public void onClick(ClickEvent clickEvent) {
-
                 final String customerName = txtCustomerName.getText();
+                if(customerName.isEmpty()){
+                    Window.alert("The customer name cannot be empty.");
+                    return;
+                }
                 final String callerNumber = txtCallerNumber.getText();
                 if(!verifyNumber(callerNumber)) {
                     Window.alert("The caller number " + callerNumber + " must be of the form ddd-ddd-dddd");
@@ -293,7 +307,6 @@ public class PhoneBillGwt implements EntryPoint {
                     Window.alert("The callee number " + calleeNumber + " must be of the form ddd-ddd-dddd");
                     return;
                 }
-
                 final String startTime = txtStartTime.getText();
                 if(!verifyTime(startTime)){
                     Window.alert("The start time " + startTime + " must be of the form mm/dd/yyy hh:mm am");
@@ -304,13 +317,11 @@ public class PhoneBillGwt implements EntryPoint {
                     Window.alert("The end time " + endTime + " must be of the form mm/dd/yyy hh:mm am");
                     return;
                 }
-
                 PingServiceAsync async = GWT.create(PingService.class);
                 async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
                     public void onFailure(Throwable ex) {
                         Window.alert(ex.toString());
                     }
-
                     public void onSuccess(AbstractPhoneBill phonebill) {
                         int length;
                         Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
@@ -319,27 +330,14 @@ public class PhoneBillGwt implements EntryPoint {
                                 callerNumber + " to " + calleeNumber + " between " +
                                 startTime + " and " + endTime + " was added" +
                                 " to the phone bill.");
-
-                        txtCustomerName.setText(null);
-                        txtCustomerName.setVisible(false);
-                        txtCallerNumber.setText(null);
-                        txtCallerNumber.setVisible(false);
-                        txtCalleeNumber.setText(null);
-                        txtCalleeNumber.setVisible(false);
-                        txtStartTime.setText(null);
-                        txtStartTime.setVisible(false);
-                        txtEndTime.setText(null);
-                        txtEndTime.setVisible(false);
-                        btnAddCall.setVisible(false);
-                        lblCustomerName.setVisible(false);
-                        lblCallerNumber.setVisible(false);
-                        lblCalleeNumber.setVisible(false);
-                        lblStartTime.setVisible(false);
-                        lblEndTime.setVisible(false);
+                        txtCustomerName.setText("");
+                        txtCallerNumber.setText("");
+                        txtCalleeNumber.setText("");
+                        txtStartTime.setText("");
+                        txtEndTime.setText("");
                     }
                 });
             }
-
         };
     }
 
