@@ -13,11 +13,17 @@ import edu.pdx.cs410J.AbstractPhoneCall;
 import edu.pdx.cs410J.AbstractPhoneBill;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 
 /**
- * A basic GWT class that makes sure that we can send an Phone Bill back from the server
+ * @author Dan Conradt 8/11/2015
+ *
+ * A basic GWT class that makes sure that we can send an Phone Bill back from the server.
+ * This class handles what widgets get displayed based on the user selection from the menu
+ * bar.  The user can add a new call, display all the calls for a customer, search for call
+ * based on a time frame provided by the customer.  There is a help menu to show a README
+ * file which explains how the user should perform the actions to be successful in using the program.
+ *
  */
 public class PhoneBillGwt implements EntryPoint {
 
@@ -45,6 +51,10 @@ public class PhoneBillGwt implements EntryPoint {
     private int lblFromTop = 100;
 
 
+    /**
+     * Displays the start layout for each user action that
+     * requires a change in the widgets that are displayed.
+     */
     public void onModuleLoad() {
         Command readMe = new Command() {
             public void execute() {
@@ -84,6 +94,10 @@ public class PhoneBillGwt implements EntryPoint {
         rootPanel.add(menu);
   }
 
+    /**
+     * Displays calls for a customer with a given set start/stop  dates and times.
+     * @param rootPanel
+     */
     private void searchCalls(RootPanel rootPanel) {
         rootPanel.clear();
         txtCustomerName = new TextBox();
@@ -109,6 +123,11 @@ public class PhoneBillGwt implements EntryPoint {
         btnDisplay.addClickHandler(displaySearchCalls(rootPanel));
     }
 
+    /**
+     * Handles the search request when the user clicks the search button.
+     * @param rootPanel
+     * @return
+     */
     private ClickHandler displaySearchCalls(final RootPanel rootPanel) {
         return new ClickHandler() {
             public void onClick( ClickEvent clickEvent )
@@ -176,7 +195,10 @@ public class PhoneBillGwt implements EntryPoint {
         };
     }
 
-
+    /**
+     * Handles the list call for a customer selection.
+     * @param rootPanel
+     */
     private void listCalls(RootPanel rootPanel) {
         rootPanel.clear();
         txtCustomerName = new TextBox();
@@ -191,6 +213,11 @@ public class PhoneBillGwt implements EntryPoint {
 
     }
 
+    /**
+     * Handles the add a call and create a new phone bill from
+     * user provided phone bill information.
+     * @param rootPanel
+     */
     private void addCall(RootPanel rootPanel) {
         rootPanel.clear();
         txtCustomerName = new TextBox();
@@ -227,7 +254,12 @@ public class PhoneBillGwt implements EntryPoint {
         btnAddCall.addClickHandler(createNewPhoneBillOnServer());
     }
 
-
+    /**
+     * The click handler when the user clicks the display calls
+     * button.
+     * @param rootPanel
+     * @return
+     */
     private ClickHandler displayAllCalls(final RootPanel rootPanel) {
         return new ClickHandler() {
             public void onClick( ClickEvent clickEvent )
@@ -289,6 +321,12 @@ public class PhoneBillGwt implements EntryPoint {
             }
         };
     }
+
+    /**
+     * Click handler to handle when a user enters information to create a phonebill
+     * or add a call to a phone bill.
+     * @return
+     */
     private ClickHandler createNewPhoneBillOnServer() {
         return new ClickHandler() {
             public void onClick(ClickEvent clickEvent) {
@@ -341,6 +379,13 @@ public class PhoneBillGwt implements EntryPoint {
         };
     }
 
+    /**
+     * Uses a regex expression to validate the user provided date time entry.
+     * I used an online tool at regexpal.com to assist in developing this
+     * validation expression.
+     * @param startEndTime
+     * @return
+     */
     private boolean verifyTime(String startEndTime) {
         if(startEndTime.matches("^(((((0[13578])|([13578])|(1[02]))[\\-\\/\\s]?((0[1-9])|([1-9])|([1-2][0-9])|(3[01])))|" +
                 "((([469])|(11))[\\-\\/\\s]?((0[1-9])|([1-9])|([1-2][0-9])|(30)))|((02|2)[\\-\\/\\s]?((0[1-9])|([1-9])|" +
@@ -351,6 +396,11 @@ public class PhoneBillGwt implements EntryPoint {
             return false;
     }
 
+    /**
+     * Regex expression to verify the phone number is in the correct format.
+     * @param theNumber
+     * @return
+     */
     private boolean verifyNumber(String theNumber) {
         if(theNumber.matches("\\d{3}-\\d{3}-\\d{4}"))
             return true;
@@ -362,9 +412,12 @@ public class PhoneBillGwt implements EntryPoint {
      * Pop up the readme text.
      */
     public void displayReadMe() {
-        Window.alert("This program uses google web tools to create a phone bill web application.  The application will" +
-                " provide a menu of actions to perform on a phonebill, add and search, and a help menu item which will " +
-                "display this message in a popup window.  The use of the PhoneBill and PhoneCall classes will hold phone bill " +
-                "informationn during the web session.  Pretty Print will be utilized to display phone bill infomation.");
+        Window.alert("This program will allow you to create a phone bill for a customer. The menu bar actions menu" +
+                "provides the add call, display call and search calls functionality.  To successfully implement these " +
+                "actions it is required that a customer name is provided with a maximum length of 20 characters.  The phone " +
+                "numbers must be in the format of ddd-ddd-dddd so, 503.452.6534 would not be a correct format, but 503-452-4564" +
+                "would be of the correct form.  The Date/Time should be based on a 12 hour clock and of the form mm/dd/yyyy hh:mm am and leading zeros can be added or " +
+                "omitted.  The forms 8/24/2016 2:00 pm and 08/24/2016 02:00 pm are both valid. An incorrect form could be something  like" +
+                " 8.24.2016 2:00 pm or 8/24/2016 14:00 pm.");
     }
 }

@@ -9,7 +9,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ * @author Dan Conradt 8/11/2015
+ * Class to manage the getters and setters for phone bill requests.
+ */
 public class PhoneBill extends AbstractPhoneBill
 {
   private String customerName;
