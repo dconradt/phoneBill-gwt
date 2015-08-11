@@ -133,13 +133,16 @@ public class PhoneBillGwt implements EntryPoint {
             public void onClick( ClickEvent clickEvent )
             {
 
-                rootPanel.clear();
                 String customerName = txtCustomerName.getText();
                 String callerNumber = "";
                 String calleeNumber = "";
                 final String startTime = txtStartTime.getText();
                 final String endTime = txtEndTime.getText();
-
+                if(customerName.isEmpty()){
+                    Window.alert("The customer name cannot be empty.");
+                    return;
+                }
+                rootPanel.clear();
                 PingServiceAsync async = GWT.create(PingService.class);
                 async.ping(customerName, callerNumber, calleeNumber, startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
                     public void onFailure(Throwable ex) {
@@ -264,12 +267,17 @@ public class PhoneBillGwt implements EntryPoint {
         return new ClickHandler() {
             public void onClick( ClickEvent clickEvent )
             {
-                rootPanel.clear();
+
                 String customerName = txtCustomerName.getText();
                 String callerNumber = "";
                 String calleeNumber = "";
                 String startTime = "";
                 String endTime = "";
+                if(customerName.isEmpty()){
+                    Window.alert("The customer name cannot be empty.");
+                    return;
+                }
+                rootPanel.clear();
 
                 PingServiceAsync async = GWT.create(PingService.class);
                 async.ping(customerName,callerNumber, calleeNumber,startTime, endTime, new AsyncCallback<AbstractPhoneBill>() {
@@ -280,6 +288,7 @@ public class PhoneBillGwt implements EntryPoint {
 
                     public void onSuccess( AbstractPhoneBill phonebill )
                     {
+
                         Collection<AbstractPhoneCall> calls = phonebill.getPhoneCalls();
                         String customerName = phonebill.getCustomer();
                         callGrid = new Grid();
@@ -412,10 +421,10 @@ public class PhoneBillGwt implements EntryPoint {
      * Pop up the readme text.
      */
     public void displayReadMe() {
-        Window.alert("This program will allow you to create a phone bill for a customer. The menu bar actions menu" +
+        Window.alert("This program will allow you to create a phone bill for a customer. The menu bar actions menu " +
                 "provides the add call, display call and search calls functionality.  To successfully implement these " +
                 "actions it is required that a customer name is provided with a maximum length of 20 characters.  The phone " +
-                "numbers must be in the format of ddd-ddd-dddd so, 503.452.6534 would not be a correct format, but 503-452-4564" +
+                "numbers must be in the format of ddd-ddd-dddd so, 503.452.6534 would not be a correct format, but 503-452-4564 " +
                 "would be of the correct form.  The Date/Time should be based on a 12 hour clock and of the form mm/dd/yyyy hh:mm am and leading zeros can be added or " +
                 "omitted.  The forms 8/24/2016 2:00 pm and 08/24/2016 02:00 pm are both valid. An incorrect form could be something  like" +
                 " 8.24.2016 2:00 pm or 8/24/2016 14:00 pm.");
